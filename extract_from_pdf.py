@@ -141,7 +141,10 @@ for file in files:
             print(member_dict)
             members[idx] = member_dict
 
-        json_file = file.split()[0] + '.json'
+        # The output filename is the same as the source, replacing the extension with .json
+        json_file = file.rsplit('.', 1)[0] + '.json'
+        if not os.path.isdir(output_folder):
+            os.mkdir(output_folder)
         with open(os.path.join(output_folder, json_file), 'w') as fout:
             json.dump(members, fout, indent=4, sort_keys=True)
         output.close()
