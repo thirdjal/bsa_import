@@ -7,15 +7,7 @@ from io import StringIO
 from pdfminer.high_level import extract_text_to_fp
 from pdfminer.layout import LAParams
 
-base_dir = os.path.dirname(os.path.realpath(__file__))
-
-# Where can we find our source files?
-source_folder = os.path.join(base_dir, 'data')
-files = os.listdir(source_folder)
-file_pattern = '*.pdf'
-
-# Where are we putting the output files?
-output_folder = os.path.join(base_dir, 'output')
+import settings
 
 # Define some patterns to look for in the data stream
 leadership_roles = ['Cubmaster', 'Committee Member', 'Chartered Organization Rep.', 'Committee Chairman',
@@ -26,7 +18,6 @@ cities = ['Toronto']
 provinces = ['Ontartio']
 countries = ['Canada']
 genders = ['F', 'M']
-digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 table_header = re.compile(r"\s+(?:-+ +-+)+")
 bsa_id_number = re.compile(r"^\d{7,9}$")
@@ -47,8 +38,8 @@ continuation = re.compile(r"^\s{3,}\w")  # Identify a continuing line or a new r
 members = []
 
 # Read in the source PDF files
-for file in files:
-    if fnmatch(file, file_pattern):
+for file in settings.pdf_files:
+    if fnmatch(file, settings.pdf_file_pattern):
         members = []
         member_count = 0
         marker_count = 0
@@ -57,7 +48,7 @@ for file in files:
         print("------------------------------------------------------------------------------------------------------")
         output = StringIO()
         write_next = False
-        with open(os.path.join(source_folder, file), 'rb') as pdf:
+        with open(os.path.join(settings.source_folder, file), 'rb') as pdf:
             extract_text_to_fp(pdf, output, laparams=LAParams(boxes_flow=0.5), output_type='text', codec=None)
         recording = False
         for line in output.getvalue().splitlines():
@@ -143,8 +134,6 @@ for file in files:
 
         # The output filename is the same as the source, replacing the extension with .json
         json_file = file.rsplit('.', 1)[0] + '.json'
-        if not os.path.isdir(output_folder):
-            os.mkdir(output_folder)
-        with open(os.path.join(output_folder, json_file), 'w') as fout:
+        with open(os.path.join(settings.output_folder, json_file), 'w') as fout:
             json.dump(members, fout, indent=4, sort_keys=True)
         output.close()
