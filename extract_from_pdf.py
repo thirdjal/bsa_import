@@ -12,7 +12,7 @@ import settings
 # Define some patterns to look for in the data stream
 leadership_roles = ['Cubmaster', 'Committee Member', 'Chartered Organization Rep.', 'Committee Chairman',
                     'Assistant Cubmaster', 'Tiger Adult Partner', 'Den Leader', 'Parent Coordinator', 'Webelos Leader',
-                    'Tiger Den Leader', 'Pack Trainer']
+                    'Tiger Den Leader', 'Pack Trainer', 'Asst. Den Leader']
 ranks = ['Bobcat', 'Tiger', 'Wolf', 'Bear', 'Webelos', 'Arrow of Light']
 cities = ['Toronto']
 provinces = ['Ontartio']
@@ -25,7 +25,7 @@ certification_date = re.compile(r"^Youth Protect\.\(Y01\) Completed Date:(?: \d{
 phone_number = re.compile(r"^[BHMW] (?:\(\d{3}\) )?\d{3}\-\d{4}")
 name_and_street = re.compile(r"^[A-Za-z].+(?:PO Box \d+|\d{2,}\b.*\b(?:St|Ln|Ave|Pl|Dr|Rd|Ter|E|NE|NW)\b.*)")
 street_address = re.compile(r"^(?:PO Box \d+|\d{2,}\b.*\b(?:St|Ln|Ave|Pl|Dr|Rd|Ter|E|NE|NW)\b.*|The Highlands)")
-street_2 = re.compile(r"^(?:APT|Apt|#)")
+street_2 = re.compile(r"^(?:APT|Apt|#|Holaday Parks Inc)")
 city_state = re.compile(r"(?:\w+\s)*\w+, [MW]A\b")
 zip_code = re.compile(r"^(?:\d{5}\-?(?:\d{4})?|\w\d\w\-\d\w\d)")
 zip_plus_4 = re.compile(r"^\d{4}$")
