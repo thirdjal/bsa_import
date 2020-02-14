@@ -7,10 +7,15 @@ from io import StringIO
 from pdfminer.high_level import extract_text_to_fp
 from pdfminer.layout import LAParams
 
-# Where can we find our source files? 
-folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-files = os.listdir(folder)
+base_dir = os.path.dirname(os.path.realpath(__file__))
+
+# Where can we find our source files?
+source_folder = os.path.join(base_dir, 'data')
+files = os.listdir(source_folder)
 file_pattern = '*.pdf'
+
+# Where are we putting the output files?
+output_folder = os.path.join(base_dir, 'output')
 
 # Define some patterns to look for in the data stream
 leadership_roles = ['Cubmaster', 'Committee Member', 'Chartered Organization Rep.', 'Committee Chairman',
@@ -52,7 +57,7 @@ for file in files:
         print("------------------------------------------------------------------------------------------------------")
         output = StringIO()
         write_next = False
-        with open(os.path.join(folder, file), 'rb') as pdf:
+        with open(os.path.join(source_folder, file), 'rb') as pdf:
             extract_text_to_fp(pdf, output, laparams=LAParams(boxes_flow=0.5), output_type='text', codec=None)
         recording = False
         for line in output.getvalue().splitlines():
@@ -78,64 +83,65 @@ for file in files:
 
         for idx, member in enumerate(members):
             member_dict = {}
-            for i in member:
-                if re.match(name_and_street, i):
-                    member_dict['name'] = i[0:25]
-                    member_dict['address'] = {'street': i[26:]}
-                elif re.match(street_address, i):
-                    member_dict['address'] = {'street': i}
-                elif i in ranks:
-                    member_dict['rank'] = i
-                elif re.match(status, i):
+            for entry in member:
+                if re.match(name_and_street, entry):
+                    member_dict['name'] = entry[0:25]
+                    member_dict['address'] = {'street': entry[26:]}
+                elif re.match(street_address, entry):
+                    member_dict['address'] = {'street': entry}
+                elif entry in ranks:
+                    member_dict['rank'] = entry
+                elif re.match(status, entry):
                     if 'status' not in member_dict:
-                        member_dict['status'] = i
-                    elif i == 'N':
-                        member_dict['boys_life'] = i
-                    elif i == 'M':
-                        member_dict['gender'] = i
-                elif re.match(magazine_subscription, i):
-                    member_dict['boys_life'] = i
-                elif re.match(birthdate, i):
-                    member_dict['birthdate'] = i
-                elif re.match(school_grade, i):
-                    member_dict['grade'] = i
-                elif i in genders:
-                    member_dict['gender'] = i
-                elif re.match(phone_number, i):
-                    t, n = i.split(' ', 1)
+                        member_dict['status'] = entry
+                    elif entry == 'N':
+                        member_dict['boys_life'] = entry
+                    elif entry == 'M':
+                        member_dict['gender'] = entry
+                elif re.match(magazine_subscription, entry):
+                    member_dict['boys_life'] = entry
+                elif re.match(birthdate, entry):
+                    member_dict['birthdate'] = entry
+                elif re.match(school_grade, entry):
+                    member_dict['grade'] = entry
+                elif entry in genders:
+                    member_dict['gender'] = entry
+                elif re.match(phone_number, entry):
+                    t, n = entry.split(' ', 1)
                     if '(' not in n:
                         n = '(206) ' + n
-                    member_dict['phone'] = {'type': t, 'number': n }
-                elif re.match(bsa_id_number, i):
-                    member_dict['bsa_id'] = i
-                elif re.match(street_2, i):
-                    member_dict['address']['street2'] = i
-                elif re.match(city_state, i):
-                    member_dict['address']['city'], member_dict['address']['state'] = i.split(', ')
-                elif i in cities:
-                    member_dict['address']['city'] = i
-                elif i in provinces:
-                    member_dict['address']['state'] = i
-                elif i in countries:
-                    member_dict['address']['country'] = i
-                elif re.match(zip_code, i):
-                    member_dict['address']['zip_code'] = i.rstrip('-')
-                elif re.match(zip_plus_4, i):
-                    member_dict['address']['zip_code'] = member_dict['address']['zip_code'] + '-' + i
+                    member_dict['phone'] = {'type': t, 'number': n}
+                elif re.match(bsa_id_number, entry):
+                    member_dict['bsa_id'] = entry
+                elif re.match(street_2, entry):
+                    member_dict['address']['street2'] = entry
+                elif re.match(city_state, entry):
+                    member_dict['address']['city'], member_dict['address']['state'] = entry.split(', ')
+                elif entry in cities:
+                    member_dict['address']['city'] = entry
+                elif entry in provinces:
+                    member_dict['address']['state'] = entry
+                elif entry in countries:
+                    member_dict['address']['country'] = entry
+                elif re.match(zip_code, entry):
+                    member_dict['address']['zip_code'] = entry.rstrip('-')
+                elif re.match(zip_plus_4, entry):
+                    member_dict['address']['zip_code'] = member_dict['address']['zip_code'] + '-' + entry
 
-                elif i in leadership_roles:
-                    member_dict['role'] = i
-                elif re.match(certification_date, i):
-                    member_dict['bsa_cert_date'] = i.split(':')[-1].strip() if i.split(':')[-1].strip() else None
+                elif entry in leadership_roles:
+                    member_dict['role'] = entry
+                elif re.match(certification_date, entry):
+                    member_dict['bsa_cert_date'] = entry.split(':')[-1].strip() if entry.split(':')[
+                        -1].strip() else None
                 else:
                     if 'name' in member_dict:
-                        member_dict['name'] += f" {i}" if not member_dict['name'][-1] == '-' else i
+                        member_dict['name'] += f" {entry}" if not member_dict['name'][-1] == '-' else entry
                     else:
-                        member_dict['name'] = i
+                        member_dict['name'] = entry
             print(member_dict)
             members[idx] = member_dict
 
         json_file = file.split()[0] + '.json'
-        with open(os.path.join(folder, json_file), 'w') as fout:
+        with open(os.path.join(output_folder, json_file), 'w') as fout:
             json.dump(members, fout, indent=4, sort_keys=True)
         output.close()
