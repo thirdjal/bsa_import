@@ -13,6 +13,8 @@ output_folder = os.path.join(base_dir, 'output')
 json_files = os.listdir(output_folder)
 json_file_pattern = '*.json'
 
+combined_json_file = 'all_years.json'
+
 # Make sure the output folder actually exists
 if not os.path.isdir(output_folder):
     os.mkdir(output_folder)
